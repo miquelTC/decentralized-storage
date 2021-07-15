@@ -13,16 +13,16 @@ contract('DStorage', ([deployer, uploader]) => {
 
   describe('deployment', () => {
     it('deploys successfully', async () => {
-      const address = await dstorage.address
-      assert.notEqual(address, 0x0)
-      assert.notEqual(address, '')
-      assert.notEqual(address, null)
-      assert.notEqual(address, undefined)
+      const address = await dstorage.address;
+      assert.notEqual(address, 0x0);
+      assert.notEqual(address, '');
+      assert.notEqual(address, null);
+      assert.notEqual(address, undefined);
     });
 
     it('has a name', async () => {
-      const name = await dstorage.name()
-      assert.equal(name, 'DStorage')
+      const name = await dstorage.name();
+      assert.equal(name, 'DStorage');
     });
   });
 
