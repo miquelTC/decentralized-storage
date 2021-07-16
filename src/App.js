@@ -2,14 +2,14 @@ import React, { useEffect, useState } from 'react';
 
 import web3 from './instances/connection';
 import getDStorage from './instances/contracts';
-import Navbar from './Navbar'
-import Main from './Main'
-import './App.css';
+import Navbar from './components/Navbar';
+import Main from './components/Main'
 
-const ipfsClient = require('ipfs-http-client')
-const ipfs = ipfsClient({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' }) // leaving out the arguments will default to these values
+const ipfsClient = require('ipfs-http-client');
+const ipfs = ipfsClient.create({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' }) // leaving out the arguments will default to these values
 
 const App = () => {
+  const [dstorage, setDstorage] = useState(null);
   const [account, setAccount] = useState(null);
   const [filesCount, setFilesCount] = useState(null);
   const [files, setFiles] = useState([]);
@@ -28,8 +28,10 @@ const App = () => {
       const networkId = await web3.eth.net.getId()
 
       // Contract
-      const dstorage = getDStorage(networkId);
-      if(dstorage) {
+      const contract = getDStorage(networkId);
+      if(contract) {
+        // Set contract in state
+        setDstorage(contract);
         // Get files amount
         const auxFilesCount = await dstorage.methods.fileCount().call()
         setFilesCount(auxFilesCount);
@@ -60,7 +62,7 @@ const App = () => {
       setCapturedFileBuffer(Buffer(reader.result));
       setCapturedFileType(file.type);
       setCapturedFileName(file.name);
-      console.log('buffer', capturedFile.buffer);
+      console.log('buffer', capturedFileBuffer);
     }      
   };
 
@@ -97,6 +99,12 @@ const App = () => {
     });
   };
   
+  // return (
+  //   <React.Fragment>
+  //     <Navbar account={account} />
+  //   </React.Fragment>
+  // );
+
   return (
     <React.Fragment>
       <Navbar account={account} />
