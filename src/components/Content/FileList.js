@@ -1,12 +1,12 @@
 import moment from 'moment';
 
-import { convertBytes } from '../utils';
+import { convertBytes } from '../../utils';
 
 const FileList = props => {
   return(
     props.files.map((file, key) => {
       return(
-        <thead style={{ 'fontSize': '12px' }} key={key}>
+        <tbody style={{ 'fontSize': '14px' }} key={key}>
           <tr>
             <td>{file.fileId}</td>
             <td>{file.fileName}</td>
@@ -31,8 +31,8 @@ const FileList = props => {
               </a>
             </td>
           </tr>
-        </thead>
-      )
+        </tbody>
+      );
     })
   );  
 };

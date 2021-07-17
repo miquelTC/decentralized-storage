@@ -2,22 +2,22 @@ import React, { useEffect, useState } from 'react';
 
 import web3 from './instances/connection';
 import getDStorage from './instances/contracts';
-import Navbar from './components/Navbar';
-import Main from './components/Main'
+import Navbar from './components/Layout/Navbar';
+import Main from './components/Content/Main'
+import box from './img/box.png';
 
 const ipfsClient = require('ipfs-http-client');
-const ipfs = ipfsClient.create({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' }) // leaving out the arguments will default to these values
+const ipfs = ipfsClient.create({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' });
 
 const App = () => {
   const [dstorage, setDstorage] = useState(null);
   const [account, setAccount] = useState(null);
-  const [filesCount, setFilesCount] = useState(null);
   const [files, setFiles] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [capturedFileBuffer, setCapturedFileBuffer] = useState(null);
   const [capturedFileType, setCapturedFileType] = useState(null);
   const [capturedFileName, setCapturedFileName] = useState(null);
-  
+
   useEffect(() => {
     const loadBlockchainData = async() => {
       // Load account
@@ -31,23 +31,35 @@ const App = () => {
       const contract = getDStorage(networkId);
       if(contract) {
         // Set contract in state
-        setDstorage(contract);
+        setDstorage(contract);        
         // Get files amount
-        const auxFilesCount = await dstorage.methods.fileCount().call()
-        setFilesCount(auxFilesCount);
+        const filesCount = await contract.methods.fileCount().call();
         // Load files&sort by the newest
         for (let i = filesCount; i >= 1; i--) {
-          const file = await dstorage.methods.files(i).call()
+          const file = await contract.methods.files(i).call();
           setFiles(prevState => {
             return [...prevState, file];
           });
         }
+
+        setIsLoading(false);
+
+        // Event subscription
+        contract.events.FileUploaded({}, (error, event) => {        
+          const file = event.returnValues;
+          setFiles(prevState => {
+            return [file, ...prevState];
+          })
+          setIsLoading(false);
+        });
       } else {
         window.alert('DStorage contract not deployed to detected network.')
       }
+
+
     };
     
-    loadBlockchainData();
+    loadBlockchainData();    
   }, []);
 
   // Get file from user
@@ -55,61 +67,47 @@ const App = () => {
     event.preventDefault();
 
     const file = event.target.files[0];
-    const reader = new window.FileReader();
 
+    const reader = new window.FileReader();
     reader.readAsArrayBuffer(file);
     reader.onloadend = () => {
       setCapturedFileBuffer(Buffer(reader.result));
       setCapturedFileType(file.type);
-      setCapturedFileName(file.name);
-      console.log('buffer', capturedFileBuffer);
+      setCapturedFileName(file.name);      
     }      
   };
 
   // Upload file to IPFS and push to the blockchain
-  const uploadFile = description => {
-    console.log("Submitting file to IPFS...");
-
+  const uploadFile = async(description) => {
     // Add file to the IPFS
-    ipfs.add(capturedFileBuffer, (error, result) => {
-      console.log('IPFS result', result.size);
-      if(error) {
-        console.error(error);
-        return;
-      }
+    const fileAdded = await ipfs.add(capturedFileBuffer);
+    if(!fileAdded) {
+      console.error('Something went wrong when updloading the file');
+      return;
+    }
 
+    // Assign value for the file without extension
+    if(capturedFileType === ''){
+      setCapturedFileType('none');
+    }
+
+    dstorage.methods.uploadFile(fileAdded.cid.string, fileAdded.size, capturedFileType, capturedFileName, description).send({ from: account })
+    .on('transactionHash', (hash) => {
       setIsLoading(true);
-      // Assign value for the file without extension
-      if(capturedFileType === ''){
-        setCapturedFileType('none');
-      }
-
-      dstorage.methods.uploadFile(result[0].hash, result[0].size, capturedFileType, capturedFileName, description).send({ from: account })
-      .on('transactionHash', (hash) => {
-        setIsLoading(false);
-        setCapturedFileType(null);
-        setCapturedFileName(null);
-
-        window.location.reload()
-      })
-      .on('error', (e) =>{
-        window.alert('Error');
-        setIsLoading(false);  
-      })
-    });
+      setCapturedFileType(null);
+      setCapturedFileName(null);
+    })
+    .on('error', (e) =>{
+      window.alert('Something went wrong when pushing to the blockchain');
+      setIsLoading(false);  
+    })
   };
-  
-  // return (
-  //   <React.Fragment>
-  //     <Navbar account={account} />
-  //   </React.Fragment>
-  // );
 
-  return (
+  return (    
     <React.Fragment>
       <Navbar account={account} />
-      {isLoading && <div id="loader" className="text-center mt-5"><p>Loading...</p></div>}
-      {!isLoading && <Main files={files} captureFile={captureFile} uploadFile={uploadFile} />}
+      <img src={box} className="rounded mx-auto d-block mt-3" width="120" height="120"/>
+      {dstorage && <Main files={files} captureFile={captureFile} uploadFile={uploadFile} isLoading={isLoading} />}
     </React.Fragment>
   );
 };
