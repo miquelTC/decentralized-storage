@@ -19,6 +19,11 @@ const App = () => {
   const [capturedFileName, setCapturedFileName] = useState(null);
 
   useEffect(() => {
+    if(!web3) {
+      window.alert('Non-Ethereum browser detected. You should consider trying MetaMask!');
+      return;
+    }
+    
     const loadBlockchainData = async() => {
       // Load account
       const accounts = await web3.eth.getAccounts();      
@@ -107,7 +112,7 @@ const App = () => {
     <React.Fragment>
       <Navbar account={account} />
       <img src={box} className="rounded mx-auto d-block mt-3" width="120" height="120"/>
-      {dstorage && <Main files={files} captureFile={captureFile} uploadFile={uploadFile} isLoading={isLoading} />}
+      {web3 && dstorage && <Main files={files} captureFile={captureFile} uploadFile={uploadFile} isLoading={isLoading} />}
     </React.Fragment>
   );
 };
