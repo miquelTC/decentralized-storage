@@ -111,7 +111,7 @@ const App = () => {
   return (    
     <React.Fragment>
       <Navbar account={account} />
-      <img src={box} className="rounded mx-auto d-block mt-3" width="120" height="120"/>
+      <img src={box} className="rounded mx-auto d-block mt-3" width="120" height="120" alt="logo" />
       {web3 && dstorage && <Main files={files} captureFile={captureFile} uploadFile={uploadFile} isLoading={isLoading} />}
     </React.Fragment>
   );
