@@ -25,8 +25,15 @@ const App = () => {
     }
     
     const loadBlockchainData = async() => {
+      // Request accounts acccess if needed
+      try {
+        await window.ethereum.request({ method: 'eth_requestAccounts' });  
+      } catch(error) {
+        console.error(error);
+      }
+      
       // Load account
-      const accounts = await web3.eth.getAccounts();      
+      const accounts = await web3.eth.getAccounts();       
       setAccount(accounts[0]);
 
       // Network ID
@@ -60,8 +67,6 @@ const App = () => {
       } else {
         window.alert('DStorage contract not deployed to detected network.')
       }
-
-
     };
     
     loadBlockchainData();    
@@ -108,11 +113,13 @@ const App = () => {
     })
   };
 
+  const showContent = web3 && account && dstorage;
+
   return (    
     <React.Fragment>
-      <Navbar account={account} />
+      <Navbar account={account} web3={web3} setAccount={setAccount} />
       <img src={box} className="rounded mx-auto d-block mt-3" width="120" height="120" alt="logo" />
-      {web3 && dstorage && <Main files={files} captureFile={captureFile} uploadFile={uploadFile} isLoading={isLoading} />}
+      {showContent && <Main files={files} captureFile={captureFile} uploadFile={uploadFile} isLoading={isLoading} />}
     </React.Fragment>
   );
 };
