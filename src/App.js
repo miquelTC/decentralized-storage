@@ -19,11 +19,13 @@ const App = () => {
   const [capturedFileName, setCapturedFileName] = useState(null);
 
   useEffect(() => {
+    // Check if the user has Metamask active
     if(!web3) {
       window.alert('Non-Ethereum browser detected. You should consider trying MetaMask!');
       return;
     }
     
+    // Function to fetch all the blockchain data
     const loadBlockchainData = async() => {
       // Request accounts acccess if needed
       try {
@@ -56,7 +58,7 @@ const App = () => {
 
         setIsLoading(false);
 
-        // Event subscription
+        // Event subscription to File Uploaded
         contract.events.FileUploaded({}, (error, event) => {        
           const file = event.returnValues;
           setFiles(prevState => {
@@ -69,7 +71,17 @@ const App = () => {
       }
     };
     
-    loadBlockchainData();    
+    loadBlockchainData();
+    
+    // Metamask Event Subscription - Account changed
+    window.ethereum.on('accountsChanged', (accounts) => {
+      setAccount(accounts[0]);
+    });
+
+    // Metamask Event Subscription - Network changed
+    window.ethereum.on('chainChanged', (chainId) => {
+      window.location.reload();
+    });
   }, []);
 
   // Get file from user
