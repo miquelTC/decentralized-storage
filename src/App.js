@@ -59,13 +59,17 @@ const App = () => {
         setIsLoading(false);
 
         // Event subscription to File Uploaded
-        contract.events.FileUploaded({}, (error, event) => {        
+        contract.events.FileUploaded()    
+        .on('data', (event) => {
           const file = event.returnValues;
           setFiles(prevState => {
             return [file, ...prevState];
           })
           setIsLoading(false);
-        });
+        })
+        .on('error', (error) => {
+          console.log(error);
+        });        
       } else {
         window.alert('DStorage contract not deployed to detected network.')
       }

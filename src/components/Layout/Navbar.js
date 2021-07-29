@@ -13,6 +13,18 @@ const Navbar = (props) => {
     const accounts = await props.web3.eth.getAccounts();
     props.setAccount(accounts[0]);
   };
+
+  let etherscanUrl;
+
+  if(web3Ctx.networkId === 3) {
+    etherscanUrl = 'https://ropsten.etherscan.io'
+  } else if(web3Ctx.networkId === 4) {
+    etherscanUrl = 'https://rinkeby.etherscan.io'
+  } else if(web3Ctx.networkId === 5) {
+    etherscanUrl = 'https://goerli.etherscan.io'
+  } else {
+    etherscanUrl = 'https://etherscan.io'
+  }
   
   return (
     <nav className="navbar navbar-dark bg-primary p-0">
@@ -25,7 +37,7 @@ const Navbar = (props) => {
           {props.account && 
             <a 
               className="nav-link small" 
-              href={`https://etherscan.io/address/${props.account}`}
+              href={`${etherscanUrl}/address/${props.account}`}
               target="blank"
               rel="noopener noreferrer"
             >
