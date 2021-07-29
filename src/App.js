@@ -11,6 +11,7 @@ const ipfs = ipfsClient.create({ host: 'ipfs.infura.io', port: 5001, protocol: '
 
 const App = () => {
   const [dstorage, setDstorage] = useState(null);
+  const [networkId, setNetworkId] = useState(null);
   const [account, setAccount] = useState(null);
   const [files, setFiles] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -40,6 +41,7 @@ const App = () => {
 
       // Network ID
       const networkId = await web3.eth.net.getId()
+      setNetworkId(networkId);
 
       // Contract
       const contract = getDStorage(networkId);
@@ -133,7 +135,7 @@ const App = () => {
 
   return (    
     <React.Fragment>
-      <Navbar account={account} web3={web3} setAccount={setAccount} />
+      <Navbar account={account} web3={web3} networkId={networkId} setAccount={setAccount} />
       <img src={box} className="rounded mx-auto d-block mt-3" width="120" height="120" alt="logo" />
       {showContent && <Main files={files} captureFile={captureFile} uploadFile={uploadFile} isLoading={isLoading} />}
     </React.Fragment>

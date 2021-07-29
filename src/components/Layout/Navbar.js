@@ -16,11 +16,11 @@ const Navbar = (props) => {
 
   let etherscanUrl;
 
-  if(web3Ctx.networkId === 3) {
+  if(props.networkId === 3) {
     etherscanUrl = 'https://ropsten.etherscan.io'
-  } else if(web3Ctx.networkId === 4) {
+  } else if(props.networkId === 4) {
     etherscanUrl = 'https://rinkeby.etherscan.io'
-  } else if(web3Ctx.networkId === 5) {
+  } else if(props.networkId === 5) {
     etherscanUrl = 'https://goerli.etherscan.io'
   } else {
     etherscanUrl = 'https://etherscan.io'
